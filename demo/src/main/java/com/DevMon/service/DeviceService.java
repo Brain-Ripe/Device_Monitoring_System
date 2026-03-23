@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class DeviceService {
@@ -17,6 +18,9 @@ public class DeviceService {
     }
 
     public Device registerDevice(Device device) {
+
+        device.setApiKey(UUID.randomUUID().toString());
+
         return deviceRepository.save(device);
     }
 
@@ -35,4 +39,6 @@ public class DeviceService {
     public void deleteDevice(Long id) {
         deviceRepository.deleteById(id);
     }
+
+    public Device findByApiKey(String apiKey){ return deviceRepository.findByApiKey(apiKey);};
 }

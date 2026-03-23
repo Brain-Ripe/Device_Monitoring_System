@@ -20,6 +20,8 @@ public class Device {
     @Column(nullable = false)
     private String deviceType;
 
+    private String apiKey;
+
     private String ipAddress;
 
     private String location;
@@ -99,4 +101,8 @@ public class Device {
     public void setLastSeen(LocalDateTime lastSeen) {
         this.lastSeen = lastSeen;
     }
+
+    public String getApiKey() {return apiKey;}
+
+    public void setApiKey(String apiKey) {this.apiKey = apiKey;}
 }

@@ -17,7 +17,7 @@ public class DeviceController {
         this.deviceService = deviceService;
     }
 
-    @PostMapping
+    @PostMapping("/register")
     public Device registerDevice(@RequestBody Device device) {
         return deviceService.registerDevice(device);
     }
