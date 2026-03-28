@@ -52,7 +52,7 @@ public class MetricsService {
      */
     @Transactional
     public void flushOldMetrics() {
-        LocalDateTime cutoff = LocalDateTime.now().minusMinutes(2);
+        LocalDateTime cutoff = LocalDateTime.now().minusHours(48);
         metricsRepository.deleteMetricsOlderThan(cutoff);
 
 

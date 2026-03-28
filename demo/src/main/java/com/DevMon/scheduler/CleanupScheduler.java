@@ -21,7 +21,7 @@ public class CleanupScheduler {
      * fixedRate = 3600000 ms (1 Hour)
      * This will trigger the service method to flush data older than 48 hours.
      */
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(fixedRate = 3600000)
     public void runMetricCleanup() {
         logger.info("CRON START: Initiating 2-mins old metric retention flush...");
 
