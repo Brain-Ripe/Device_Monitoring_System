@@ -5,6 +5,8 @@ import com.DevMon.entity.Device;
 import com.DevMon.entity.DeviceMetric;
 import com.DevMon.repository.DeviceMetricRepository;
 import com.DevMon.repository.DeviceRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,8 +15,9 @@ import java.time.LocalDateTime;
 @Service
 public class MetricsService {
 
+    private static final Logger logger = LoggerFactory.getLogger(MetricsService.class);
     private final DeviceRepository deviceRepository;
-    private final DeviceMetricRepository metricsRepository; // Added this
+    private final DeviceMetricRepository metricsRepository;
 
     public MetricsService(DeviceRepository deviceRepository, DeviceMetricRepository metricsRepository) {
         this.deviceRepository = deviceRepository;
@@ -23,40 +26,31 @@ public class MetricsService {
 
     @Transactional
     public void processMetrics(Device device, DeviceMetricsDTO metrics) {
-        // 1. Create the 'Weak Entity' instance
+        // 1. Map DTO to Entity (Ensure all fields from Go Agent are here)
         DeviceMetric deviceMetric = new DeviceMetric();
-
-        // 2. Link the 'Strong' parent (The ID is extracted automatically)
         deviceMetric.setDevice(device);
-
-        // 3. Map data from DTO to Entity
         deviceMetric.setCpuUsage(metrics.getCpuUsage());
         deviceMetric.setRamUsageBytes(metrics.getRamUsage());
-        // If your entity has fields for these, map them too:
+        
+        // Ensure your DeviceMetric entity has these fields to stop losing data!
         // deviceMetric.setGpuUsage(metrics.getGpuUsage());
         // deviceMetric.setTemperature(metrics.getTemperature());
 
-        // 4. Save to Supabase via the Repository
+        // 2. Persist the 'Weak' record
         metricsRepository.save(deviceMetric);
 
-        // 5. Update the 'Strong' entity's status/lastSeen
+        // 3. Update 'Strong' parent state
+        // Hibernate Dirty Checking will sync this to DB at the end of the transaction
         device.setLastSeen(LocalDateTime.now());
         device.setStatus("ONLINE");
-        deviceRepository.save(device);
-
-        System.out.println("Metrics persisted for: " + device.getDeviceIdentifier());
+        
+        logger.debug("Metrics persisted for device: {}", device.getDeviceIdentifier());
     }
 
-    /**
-     * Call this from a Scheduler to maintain your 48-hour window.
-     */
     @Transactional
     public void flushOldMetrics() {
-        LocalDateTime cutoff = LocalDateTime.now().minusMinutes(2);
+        LocalDateTime cutoff = LocalDateTime.now().minusMinutes(5);
         metricsRepository.deleteMetricsOlderThan(cutoff);
-
-
-        System.out.println(" \n\n\n[CLEANUP] Successfully purged \n\n\n");
-
+        logger.info("Flushed metrics older than: {}", cutoff);
     }
 }
