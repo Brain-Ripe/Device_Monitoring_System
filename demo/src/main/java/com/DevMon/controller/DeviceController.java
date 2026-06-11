@@ -10,9 +10,10 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/devices")
 public class DeviceController {
-
     private final DeviceService deviceService;
 
+
+//    Constructor Injection
     public DeviceController(DeviceService deviceService) {
         this.deviceService = deviceService;
     }
